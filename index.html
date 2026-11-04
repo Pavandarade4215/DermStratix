@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DermStratix AI — Healthcare Decision Support Platform</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="saas-theme">
+    <!-- Clean Healthcare App Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-shield-heart"></i>
+                </div>
+                <div class="brand-info">
+                    <div class="brand-title">DermStratix AI</div>
+                    <div class="brand-subtitle">AI-Assisted Facial & Skin Health Screening</div>
+                </div>
+            </div>
+
+            <!-- Simplified Navigation -->
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-view="screening">
+                    <i class="fa-solid fa-stethoscope"></i>
+                    <span>Home / Screening</span>
+                </button>
+                <button class="nav-btn" data-view="history">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Screening History</span>
+                    <span class="badge-count" id="history-badge">3</span>
+                </button>
+                <button class="nav-btn" data-view="about">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>About the Platform</span>
+                </button>
+                <button class="nav-btn" data-view="performance">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Model Performance</span>
+                </button>
+            </nav>
+
+            <!-- User Workspace Badge -->
+            <div class="header-user">
+                <div class="user-badge" title="Authenticated Clinician Workspace">
+                    <div class="user-avatar"><i class="fa-solid fa-user-doctor"></i></div>
+                    <div class="user-text">
+                        <span class="user-name">Clinical Portal</span>
+                        <span class="user-status"><span class="dot-online"></span> Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+
+        <!-- ==============================================================================
+             VIEW 1: SCREENING DASHBOARD (PRIMARY HOMEPAGE)
+             ============================================================================== -->
+        <section id="view-screening" class="app-view active">
+            <!-- Welcome Hero Section -->
+            <div class="welcome-card">
+                <div class="welcome-content">
+                    <h1>AI-Powered Skin Health Screening</h1>
+                    <p>Non-invasive decision support providing automated computer vision analysis and calibrated risk stratification for dermatological lesions and facial cutaneous conditions.</p>
+                </div>
+                <div class="welcome-stats">
+                    <div class="stat-item">
+                        <span class="stat-num">90.9%</span>
+                        <span class="stat-label">Screening Accuracy</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-num">3-Tier</span>
+                        <span class="stat-label">Clinical Risk Triage</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-num">Explainable</span>
+                        <span class="stat-label">LIME Visual Attribution</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two Screening Mode Cards -->
+            <div class="screening-modes-grid mt-4">
+                <div class="mode-card active" id="mode-card-lesion" onclick="setScreeningMode('lesion')">
+                    <div class="mode-icon-box icon-lesion">
+                        <i class="fa-solid fa-microscope"></i>
+                    </div>
+                    <div class="mode-content">
+                        <div class="mode-badge">Dermoscopy Mode</div>
+                        <h3>Dermoscopic Skin Lesion Screening</h3>
+                        <p>Close-up inspection of pigmented lesions, melanocytic nevi, melanoma, and carcinomas with automated ABCD morphometric criteria.</p>
+                    </div>
+                    <div class="mode-selector">
+                        <span class="radio-indicator"></span>
+                    </div>
+                </div>
+
+                <div class="mode-card" id="mode-card-facial" onclick="setScreeningMode('facial')">
+                    <div class="mode-icon-box icon-facial">
+                        <i class="fa-solid fa-head-side-mask"></i>
+                    </div>
+                    <div class="mode-content">
+                        <div class="mode-badge">Portrait Mode</div>
+                        <h3>Facial Skin Screening</h3>
+                        <p>Macro-level facial portrait evaluation for vascular erythema (rosacea), inflammatory acne, hyperpigmentation (melasma), and jaundice markers.</p>
+                    </div>
+                    <div class="mode-selector">
+                        <span class="radio-indicator"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workspace: Upload & Analysis vs. Results -->
+            <div class="screening-workspace mt-4">
+                <!-- Left Column: Image Upload & Parameters -->
+                <div class="workspace-col col-left">
+                    <div class="card clean-card">
+                        <div class="card-title">
+                            <h3><i class="fa-solid fa-upload"></i> Image Acquisition</h3>
+                            <button class="btn-text" onclick="loadSamplePreset('sample_melanoma')"><i class="fa-solid fa-flask"></i> Load Demo</button>
+                        </div>
+
+                        <!-- Minimal Drag and Drop Box -->
+                        <div class="dropzone" id="dropzone">
+                            <input type="file" id="file-input" accept="image/*" style="display:none;">
+                            <div class="dropzone-body">
+                                <div class="dropzone-icon">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                </div>
+                                <h4>Upload Image for Screening</h4>
+                                <p>Drag and drop a dermoscopic or facial photo, or browse from device</p>
+                                <div class="dropzone-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="document.getElementById('file-input').click()">
+                                        <i class="fa-solid fa-folder-open"></i> Browse Image
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm" onclick="triggerWebcamCapture()">
+                                        <i class="fa-solid fa-camera"></i> Camera
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Clinical Samples Selector -->
+                        <div class="form-group mt-3">
+                            <label><i class="fa-solid fa-vial"></i> Or Select Verified Clinical Test Case</label>
+                            <select id="sample-select" class="form-select" onchange="onSampleDropdownChange(this.value)">
+                                <option value="" disabled selected>Choose a sample patient case...</option>
+                                <option value="sample_melanoma">Malignant Melanoma (High Risk Asymmetric Lesion)</option>
+                                <option value="sample_nevus">Melanocytic Nevus (Benign Symmetric Mole)</option>
+                                <option value="sample_bcc">Basal Cell Carcinoma (Non-Melanoma Malignancy)</option>
+                                <option value="sample_rosacea">Facial Rosacea (Centrofacial Vascular Erythema)</option>
+                                <option value="sample_jaundice">Facial Jaundice (Bilirubin Icterus Deposition)</option>
+                                <option value="sample_acne">Acne Vulgaris (Inflammatory Blemishes)</option>
+                                <option value="sample_normal">Normal Healthy Skin Complexion</option>
+                            </select>
+                        </div>
+
+                        <!-- Optional Clinical Vitals Drawer -->
+                        <div class="vitals-drawer mt-3">
+                            <div class="drawer-header" onclick="toggleVitalsDrawer()">
+                                <div class="drawer-title">
+                                    <i class="fa-solid fa-heart-pulse"></i>
+                                    <span>Patient Clinical Indicators (Optional)</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-down" id="drawer-arrow"></i>
+                            </div>
+                            <div class="drawer-content" id="vitals-drawer-content">
+                                <p class="drawer-desc">Adding patient vitals refines risk scoring via clinical gradient boosting fusion.</p>
+                                <div class="vitals-fields">
+                                    <div class="field-item">
+                                        <div class="field-label"><span>Age</span><strong id="disp-age">52</strong> yrs</div>
+                                        <input type="range" id="vit-age" min="18" max="95" value="52" oninput="document.getElementById('disp-age').innerText = this.value">
+                                    </div>
+                                    <div class="field-item">
+                                        <div class="field-label"><span>Systolic BP</span><strong id="disp-sys">136</strong> mmHg</div>
+                                        <input type="range" id="vit-sys" min="80" max="220" value="136" oninput="document.getElementById('disp-sys').innerText = this.value">
+                                    </div>
+                                    <div class="field-item">
+                                        <div class="field-label"><span>Fasting Glucose</span><strong id="disp-gluc">110</strong> mg/dL</div>
+                                        <input type="range" id="vit-gluc" min="60" max="300" value="110" oninput="document.getElementById('disp-gluc').innerText = this.value">
+                                    </div>
+                                    <div class="field-item">
+                                        <div class="field-label"><span>BMI</span><strong id="disp-bmi">26.8</strong> kg/m²</div>
+                                        <input type="range" id="vit-bmi" min="15" max="45" step="0.1" value="26.8" oninput="document.getElementById('disp-bmi').innerText = this.value">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Execute Screening Button -->
+                        <button id="btn-screen" class="btn btn-primary btn-block mt-3" onclick="executeScreening()">
+                            <i class="fa-solid fa-stethoscope"></i>
+                            <span>Analyze Image & Stratify Risk</span>
+                        </button>
+                    </div>
+
+                    <!-- Optical Clarity Card -->
+                    <div class="card clean-card mt-3">
+                        <div class="card-title-sm">
+                            <span><i class="fa-solid fa-camera"></i> Optical Focus Verification</span>
+                            <span class="badge-status status-pass" id="blur-gate-badge">Focus Verified</span>
+                        </div>
+                        <div class="clarity-meter mt-2">
+                            <div class="clarity-track">
+                                <div class="clarity-fill" id="blur-gate-fill" style="width: 78%;"></div>
+                            </div>
+                            <div class="clarity-labels">
+                                <span>Soft Blur</span>
+                                <span class="clarity-threshold">Threshold: 30.0</span>
+                                <span>High Clarity</span>
+                            </div>
+                        </div>
+                        <p class="text-subtle mt-2" id="blur-gate-msg">Optical sharpness verified. Image is suitable for clinical diagnostic evaluation.</p>
+                    </div>
+                </div>
+
+                <!-- Right Column: Results & Clinical Triage -->
+                <div class="workspace-col col-right">
+                    <!-- Results Card -->
+                    <div class="card clean-card results-card" id="results-panel">
+                        <!-- Card Header: Primary Assessment -->
+                        <div class="results-header">
+                            <div>
+                                <div class="badge-section-label">Diagnostic Assessment</div>
+                                <h2 class="diagnosis-title" id="res-diag-title">Malignant Melanoma (mel)</h2>
+                                <div class="diagnosis-sub">Primary predictive finding based on computer vision feature analysis.</div>
+                            </div>
+                            <div class="risk-tier-pill" id="res-tier-pill">
+                                <span class="tier-dot"></span>
+                                <span id="res-tier-text">Urgent Priority</span>
+                            </div>
+                        </div>
+
+                        <!-- Triage & Health Index Metrics Grid -->
+                        <div class="triage-metrics-grid mt-3">
+                            <div class="metric-card">
+                                <div class="metric-title">Health Vitality Score</div>
+                                <div class="vitality-display">
+                                    <div class="vitality-score" id="res-vitality-num">28</div>
+                                    <div class="vitality-max">/ 100</div>
+                                </div>
+                                <div class="vitality-meter">
+                                    <div class="vitality-fill" id="res-vitality-bar" style="width: 28%; background-color: var(--urgent-red);"></div>
+                                </div>
+                                <span class="vitality-hint" id="res-vitality-label">Significant Pathology Risk</span>
+                            </div>
+
+                            <div class="metric-card">
+                                <div class="metric-title">Model Confidence</div>
+                                <div class="metric-big-num" id="res-confidence">91.4%</div>
+                                <div class="metric-meta" id="res-model-used">MobileNetV2 Transfer Model</div>
+                                <span class="vitality-hint text-success"><i class="fa-solid fa-shield-check"></i> High Statistical Confidence</span>
+                            </div>
+
+                            <div class="metric-card action-protocol-card" id="res-action-card">
+                                <div class="metric-title"><i class="fa-solid fa-hospital-user"></i> Recommended Clinical Action</div>
+                                <h4 id="res-action-header">Urgent Priority Referral</h4>
+                                <p id="res-action-desc">Immediate dermatologist consultation recommended for polarized epiluminescence dermoscopy, excisional biopsy, and histopathological staging.</p>
+                            </div>
+                        </div>
+
+                        <!-- Visual Inspection & LIME Explainability Studio -->
+                        <div class="visual-inspection-section mt-4">
+                            <div class="section-sub-header">
+                                <h3><i class="fa-solid fa-eye"></i> Visual Evidence & Explainable AI (LIME)</h3>
+                                <div class="view-switch-btns">
+                                    <button class="switch-btn active" onclick="switchImageView('lime')">LIME Attribution</button>
+                                    <button class="switch-btn" onclick="switchImageView('roi')">Localized ROI</button>
+                                    <button class="switch-btn" onclick="switchImageView('annotated')">Full Detection</button>
+                                </div>
+                            </div>
+
+                            <div class="visual-dual-grid mt-2">
+                                <div class="visual-image-wrapper">
+                                    <img id="main-result-img" src="/static/samples/melanoma.png" alt="Clinical Inspection">
+                                    <div class="visual-img-caption" id="visual-caption">
+                                        <i class="fa-solid fa-circle-info"></i> LIME Superpixel Overlay (Green highlights indicate feature evidence)
+                                    </div>
+                                </div>
+
+                                <div class="explainability-details">
+                                    <h4>Feature Attribution Drivers</h4>
+                                    <p class="text-subtle">Local Interpretable Model-agnostic Explanations (LIME) segments the region of interest to highlight morphological drivers.</p>
+                                    
+                                    <div class="driver-card">
+                                        <div class="driver-header">
+                                            <span>Pigmented Lesion Core</span>
+                                            <strong class="text-danger" id="lime-core-score">+0.48</strong>
+                                        </div>
+                                        <p class="driver-desc">Dense, irregular melanin pigmentation driving the dysplastic classification.</p>
+                                    </div>
+
+                                    <div class="driver-card mt-2">
+                                        <div class="driver-header">
+                                            <span>Border Irregularity</span>
+                                            <strong class="text-danger" id="lime-border-score">+0.31</strong>
+                                        </div>
+                                        <p class="driver-desc">Notched boundary margins and high spatial gradient variation.</p>
+                                    </div>
+
+                                    <div class="driver-card mt-2">
+                                        <div class="driver-header">
+                                            <span>Peripheral Cutaneous Skin</span>
+                                            <strong class="text-secondary">0.00</strong>
+                                        </div>
+                                        <p class="driver-desc">Uniform baseline dermal tissue without acute pathological variance.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Automated ABCD Criteria Rubric (Dermoscopic) -->
+                        <div class="abcd-section mt-4" id="abcd-container">
+                            <div class="section-sub-header">
+                                <h3><i class="fa-solid fa-ruler-combined"></i> Automated ABCD Dermatological Rubric</h3>
+                            </div>
+                            <div class="abcd-grid mt-2">
+                                <div class="abcd-card" id="card-abcd-a">
+                                    <div class="abcd-badge">A</div>
+                                    <div class="abcd-content">
+                                        <div class="abcd-name">Asymmetry Index</div>
+                                        <div class="abcd-val" id="val-abcd-a">7.4 / 10</div>
+                                        <div class="abcd-bar-track"><div class="abcd-bar-fill bar-red" id="fill-abcd-a" style="width: 74%;"></div></div>
+                                        <span class="abcd-status text-danger" id="status-abcd-a">High Asymmetry</span>
+                                    </div>
+                                </div>
+
+                                <div class="abcd-card" id="card-abcd-b">
+                                    <div class="abcd-badge">B</div>
+                                    <div class="abcd-content">
+                                        <div class="abcd-name">Border Irregularity</div>
+                                        <div class="abcd-val" id="val-abcd-b">6.8 / 10</div>
+                                        <div class="abcd-bar-track"><div class="abcd-bar-fill bar-red" id="fill-abcd-b" style="width: 68%;"></div></div>
+                                        <span class="abcd-status text-danger" id="status-abcd-b">Notched Margins</span>
+                                    </div>
+                                </div>
+
+                                <div class="abcd-card" id="card-abcd-c">
+                                    <div class="abcd-badge">C</div>
+                                    <div class="abcd-content">
+                                        <div class="abcd-name">Color Variegation</div>
+                                        <div class="abcd-val" id="val-abcd-c">7.2 / 10</div>
+                                        <div class="abcd-bar-track"><div class="abcd-bar-fill bar-red" id="fill-abcd-c" style="width: 72%;"></div></div>
+                                        <span class="abcd-status text-danger" id="status-abcd-c">Multi-Hue Variegated</span>
+                                    </div>
+                                </div>
+
+                                <div class="abcd-card" id="card-abcd-d">
+                                    <div class="abcd-badge">D</div>
+                                    <div class="abcd-content">
+                                        <div class="abcd-name">Diameter Caliber</div>
+                                        <div class="abcd-val" id="val-abcd-d">7.9 mm</div>
+                                        <div class="abcd-bar-track"><div class="abcd-bar-fill bar-red" id="fill-abcd-d" style="width: 79%;"></div></div>
+                                        <span class="abcd-status text-danger" id="status-abcd-d">> 6.0 mm Alert</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Multi-class Posterior Distribution -->
+                        <div class="distribution-section mt-4">
+                            <div class="section-sub-header">
+                                <h3><i class="fa-solid fa-chart-simple"></i> Class Posterior Probability Distribution</h3>
+                            </div>
+                            <div class="distribution-bars mt-2" id="distribution-bars">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Card Action Buttons -->
+                        <div class="results-actions mt-4">
+                            <button class="btn btn-secondary" onclick="saveToHistory()">
+                                <i class="fa-solid fa-bookmark"></i> Save to Patient History
+                            </button>
+                            <button class="btn btn-primary" onclick="openAuditReport()">
+                                <i class="fa-solid fa-file-pdf"></i> Download / Print Clinical Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==============================================================================
+             VIEW 2: SCREENING HISTORY VIEW
+             ============================================================================== -->
+        <section id="view-history" class="app-view">
+            <div class="page-header">
+                <div>
+                    <h2>Patient Screening History</h2>
+                    <p>Log of evaluated cutaneous and facial examinations with diagnostic findings and triage records.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="clearScreeningHistory()"><i class="fa-solid fa-trash-can"></i> Clear History</button>
+                </div>
+            </div>
+
+            <div class="card clean-card mt-3">
+                <div class="table-responsive">
+                    <table class="saas-table" id="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Record ID</th>
+                                <th>Screening Mode</th>
+                                <th>Primary Diagnostic Finding</th>
+                                <th>Risk Tier</th>
+                                <th>Vitality Score</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==============================================================================
+             VIEW 3: ABOUT THE PLATFORM VIEW
+             ============================================================================== -->
+        <section id="view-about" class="app-view">
+            <div class="page-header">
+                <div>
+                    <h2>About DermStratix AI</h2>
+                    <p>Clinical decision support architecture for non-invasive cutaneous health screening.</p>
+                </div>
+            </div>
+
+            <div class="about-grid mt-3">
+                <div class="card clean-card">
+                    <div class="about-icon"><i class="fa-solid fa-laptop-medical"></i></div>
+                    <h3>Platform Overview</h3>
+                    <p>DermStratix AI bridges modern computer vision and deep transfer learning to assist healthcare professionals in triaging skin lesions and facial cutaneous markers before specialist referral.</p>
+                </div>
+
+                <div class="card clean-card">
+                    <div class="about-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3>Privacy & Data Security</h3>
+                    <p>Engineered with privacy-by-design. Image inspection and feature extraction run locally without retaining patient identifiable health information (PHI) on public servers.</p>
+                </div>
+
+                <div class="card clean-card">
+                    <div class="about-icon"><i class="fa-solid fa-stethoscope"></i></div>
+                    <h3>Clinical Decision Workflow</h3>
+                    <p>Provides pre-inference optical blur verification, automated ABCD criteria quantification, and Local Interpretable Model-agnostic Explanations (LIME) for transparent recommendations.</p>
+                </div>
+            </div>
+
+            <div class="card clean-card mt-4">
+                <div class="card-title">
+                    <h3><i class="fa-solid fa-clipboard-check"></i> Intended Clinical Use & Workflow</h3>
+                </div>
+                <div class="workflow-steps mt-2">
+                    <div class="step-item">
+                        <div class="step-num">1</div>
+                        <div class="step-text">
+                            <strong>Image Acquisition & Gatekeeping</strong>
+                            <p>Optical Laplacian sharpness verification ensures diagnostic image quality before neural processing.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">2</div>
+                        <div class="step-text">
+                            <strong>Feature Extraction & Transfer Inference</strong>
+                            <p>Dual-mode ROI isolation extracts morphological and deep spatial embeddings for multi-class classification.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">3</div>
+                        <div class="step-text">
+                            <strong>LIME Explainability & Triage</strong>
+                            <p>Calibrated posterior probabilities are mapped into three actionable clinical risk tiers with superpixel attribution maps.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==============================================================================
+             VIEW 4: MODEL PERFORMANCE VIEW (TECHNICAL EVALUATION)
+             ============================================================================== -->
+        <section id="view-performance" class="app-view">
+            <div class="page-header">
+                <div>
+                    <h2>Model Benchmarks & Performance</h2>
+                    <p>Comparative empirical evaluation across classical machine learning ensembles and deep transfer architectures.</p>
+                </div>
+            </div>
+
+            <!-- Model Evaluation Matrix Table -->
+            <div class="card clean-card mt-3">
+                <div class="card-title">
+                    <h3><i class="fa-solid fa-table"></i> Comparative Model Evaluation Matrix</h3>
+                </div>
+                <div class="table-responsive mt-2">
+                    <table class="saas-table">
+                        <thead>
+                            <tr>
+                                <th>Architecture</th>
+                                <th>Model Paradigm</th>
+                                <th>Clinical Vitals Acc.</th>
+                                <th>Binary Accuracy</th>
+                                <th>Facial 5-Class</th>
+                                <th>7-Class Categorization</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="performance-table-body">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Interactive Benchmark Charts -->
+            <div class="charts-grid mt-4">
+                <div class="card clean-card">
+                    <div class="card-title">
+                        <h3><i class="fa-solid fa-chart-column"></i> Multi-Metric Comparison</h3>
+                    </div>
+                    <div class="chart-box">
+                        <canvas id="saas-chart-metrics" height="240"></canvas>
+                    </div>
+                </div>
+
+                <div class="card clean-card">
+                    <div class="card-title">
+                        <h3><i class="fa-solid fa-braille"></i> Normalized 7-Class Confusion Matrix</h3>
+                    </div>
+                    <div class="cm-wrapper" id="saas-cm-wrapper">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Professional Healthcare Medical Disclaimer Footer -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <div class="disclaimer-badge"><i class="fa-solid fa-triangle-exclamation"></i> Clinical Advisory</div>
+            <p class="disclaimer-text">DermStratix AI is an investigational clinical decision support platform engineered for preliminary risk stratification and triaging. Automated findings do not constitute a definitive histopathological diagnosis, medical prognosis, or prescription. All screening assessments must be correlated with patient clinical history and verified via in-person examination and biopsy by a licensed healthcare professional.</p>
+            <div class="footer-copyright">© 2026 DermStratix AI Platform • All rights reserved • HIPAA-Compliant Architecture</div>
+        </div>
+    </footer>
+
+    <!-- Clinical Audit Report Modal -->
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title"><i class="fa-solid fa-file-medical"></i> Clinical Screening Summary</h3>
+                    <div class="modal-subtitle">Patient Decision Support Documentation</div>
+                </div>
+                <button class="modal-close-btn" onclick="closeAuditReport()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-report-content">
+                <!-- Populated dynamically via JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAuditReport()">Close</button>
+                <button class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print / Save PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
