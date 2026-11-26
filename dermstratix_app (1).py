@@ -1,11 +1,4 @@
-#!/usr/bin/env python3
-"""
-DermStratix — Single-File Runnable Healthcare AI Platform
-Run directly:
-    pip install flask opencv-python-headless numpy pandas scikit-learn matplotlib pillow torch torchvision
-    python dermstratix_app.py
-Then open http://127.0.0.1:5000 in your browser.
-"""
+
 import os
 import json
 import time
